@@ -184,8 +184,8 @@ class LogCleanerManagerTest extends JUnitSuite with Logging {
     val log = new Log(partitionDir,
       config,
       recoveryPoint = 0L,
-      time.scheduler,
-      time)
+      scheduler = time.scheduler,
+      time = time)
     log
   }
 
