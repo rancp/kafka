@@ -177,6 +177,23 @@ public class CompositeReadOnlyWindowStoreTest {
         assertThat(results.size(), equalTo(2));
     }
 
+    @Test
+    public void reproduceIssue() {
+        final ReadOnlyWindowStoreStub<String, String> secondUnderlying = new
+            ReadOnlyWindowStoreStub<>(WINDOW_SIZE);
+        stubProviderTwo.addStore(storeName, secondUnderlying);
+        underlyingWindowStore.put("a", "a", 5L);
+        secondUnderlying.put("b", "b", 10L);
+
+         // should return 2 results, got 1
+         List<KeyValue<Windowed<String>, String>> results = StreamsTestUtils.toList(windowStore.fetch("a", "b", 5, 10));
+         assertThat(results.size(), equalTo(2));
+
+        // should return 1 result, got 0
+        results = StreamsTestUtils.toList(windowStore.fetch("a", "b", 2, 6));
+        assertThat(results.size(), equalTo(1));
+    }
+
     @Test(expected = NullPointerException.class)
     public void shouldThrowNPEIfKeyIsNull() {
         windowStore.fetch(null, 0, 0);
